@@ -1,0 +1,5 @@
+panel
+psycopg2-binary
+sqlalchemy
+pandas
+python-dotenv

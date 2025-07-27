@@ -5,14 +5,11 @@ from datetime import date
 import re
 
 def is_valid_email(email):
-    """Verifica se o formato do email é válido."""
     regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(regex, email) is not None
 
 def create_login_page(navigate_to_main_page):
-    """Cria a página de login e cadastro com abas."""
 
-    # --- Componentes da Aba de Login (Já existentes) ---
     email_input = pn.widgets.TextInput(
         name="Email",
         placeholder="Digite seu email",
@@ -43,8 +40,6 @@ def create_login_page(navigate_to_main_page):
                 ✅ Login realizado com sucesso! Bem-vindo, {current_user['nome']}
             </div>
             """
-            # from main_page import create_main_page
-            # main_layout.objects = [create_main_page(main_layout)]
             navigate_to_main_page()
         else:
             message_pane_login.object = """
@@ -68,7 +63,6 @@ def create_login_page(navigate_to_main_page):
         align='center'
     )
 
-    # --- Componentes da Aba de Cadastro (Novos) ---
     nome_reg_input = pn.widgets.TextInput(name="Nome Completo", placeholder="Digite seu nome", width=320)
     email_reg_input = pn.widgets.TextInput(name="Email", placeholder="Digite um email válido", width=320)
     senha_reg_input = pn.widgets.PasswordInput(name="Senha", placeholder="Mínimo de 6 caracteres", width=320)
@@ -87,7 +81,6 @@ def create_login_page(navigate_to_main_page):
         data_nasc = data_nascimento_input.value
         sexo = sexo_input.value
 
-        # Validações
         if not all([nome, email, senha, confirm_senha]):
             message_pane_reg.object = "<div style='color: #dc3545; text-align: center;'>⚠️ Preencha todos os campos obrigatórios.</div>"
             return
@@ -104,12 +97,10 @@ def create_login_page(navigate_to_main_page):
         try:
             resultsExists = db.execute_query("SELECT id_usuario FROM usuario WHERE email = :email", {"email": email})
             user_dataExists = resultsExists[0] if resultsExists else None
-            # Verificar se o email já existe
             if user_dataExists:
                 message_pane_reg.object = "<div style='color: #dc3545; text-align: center;'>📧 Este email já está cadastrado.</div>"
                 return
 
-            # Inserir novo usuário
             query = """
             INSERT INTO usuario (nome, senha, email, data_nascimento, sexo)
             VALUES (:nome, :senha, :email, :data_nascimento, :sexo)
@@ -125,7 +116,6 @@ def create_login_page(navigate_to_main_page):
                 ✅ Cadastro realizado com sucesso! Você já pode fazer o login.
             </div>
             """
-            # Limpar campos após sucesso
             nome_reg_input.value = ""
             email_reg_input.value = ""
             senha_reg_input.value = ""
@@ -150,7 +140,6 @@ def create_login_page(navigate_to_main_page):
         align='center'
     )
 
-    # --- Estrutura Principal com Abas ---
     tabs = pn.Tabs(
         ("Entrar", login_tab),
         ("Cadastrar", register_tab),

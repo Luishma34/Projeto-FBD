@@ -4,16 +4,12 @@ from auth import current_user
 from utils import safe_get_value
 
 def create_metas_crud_page(navigate_to_main_page):
-    """Cria a página de CRUD para registros de metas"""
-
-    # Widgets para inserção/edição
     tipo_meta_input = pn.widgets.Select(
         name="🎯 Tipo de Meta",
         options=["Água", "Sono", "Exercícios"],
         width=200
     )
     
-    # Campos específicos por tipo de meta
     horas_sono_input = pn.widgets.IntInput(
         name="⏰ Horas de Sono",
         value=8,
@@ -39,7 +35,6 @@ def create_metas_crud_page(navigate_to_main_page):
         visible=False
     )
 
-    # Widgets para busca e edição
     search_id_input = pn.widgets.IntInput(
         name="🔍 Buscar por ID",
         value=None,
@@ -47,7 +42,6 @@ def create_metas_crud_page(navigate_to_main_page):
         placeholder="Digite o ID da meta"
     )
     
-    # Widgets para edição (inicialmente vazios)
     edit_tipo_meta_input = pn.widgets.Select(
         name="🎯 Tipo de Meta",
         options=["Água", "Sono", "Exercícios"],
@@ -83,17 +77,13 @@ def create_metas_crud_page(navigate_to_main_page):
         visible=False
     )
     
-    # Função para mostrar campos apropriados baseado no tipo de meta
     def update_fields_visibility():
-        """Atualiza visibilidade dos campos baseado no tipo de meta selecionado"""
         tipo = tipo_meta_input.value
         
-        # Esconder todos os campos primeiro
         horas_sono_input.visible = False
         quantidade_agua_input.visible = False
         duracao_exercicio_input.visible = False
         
-        # Mostrar campo apropriado
         if tipo == "Sono":
             horas_sono_input.visible = True
         elif tipo == "Água":
@@ -102,15 +92,12 @@ def create_metas_crud_page(navigate_to_main_page):
             duracao_exercicio_input.visible = True
     
     def update_edit_fields_visibility():
-        """Atualiza visibilidade dos campos de edição baseado no tipo de meta selecionado"""
         tipo = edit_tipo_meta_input.value
         
-        # Esconder todos os campos primeiro
         edit_horas_sono_input.visible = False
         edit_quantidade_agua_input.visible = False
         edit_duracao_exercicio_input.visible = False
         
-        # Mostrar campo apropriado
         if tipo == "Sono":
             edit_horas_sono_input.visible = True
         elif tipo == "Água":
@@ -118,14 +105,11 @@ def create_metas_crud_page(navigate_to_main_page):
         elif tipo == "Exercícios":
             edit_duracao_exercicio_input.visible = True
     
-    # Configurar watchers para mudança de tipo
     tipo_meta_input.param.watch(lambda event: update_fields_visibility(), 'value')
     edit_tipo_meta_input.param.watch(lambda event: update_edit_fields_visibility(), 'value')
     
-    # Inicializar visibilidade
     update_fields_visibility()
     
-    # Botões com ícones
     add_button = pn.widgets.Button(
         name="➕ Adicionar",
         button_type="primary",
@@ -178,44 +162,34 @@ def create_metas_crud_page(navigate_to_main_page):
     )
     
     def back_to_main(event):
-        # Importação dinâmica para evitar dependência circular
-        # from pages.main_page import create_main_page
-        # main_layout.objects = [create_main_page(main_layout)]
         navigate_to_main_page()
     
     back_button.on_click(back_to_main)
     
-    # Header da página
     header = pn.pane.HTML("""
     <div class="metas-header">
         <h1 class="metas-title">🎯 Gerenciamento de Metas</h1>
     </div>
     """)
     
-    # Panes para mensagens e tabela
     table_pane = pn.pane.HTML("",sizing_mode='stretch_width')
     message_pane = pn.pane.HTML("", width=600, height=60)
     search_message_pane = pn.pane.HTML("", width=600, height=60)
 
-    # Cache dos dados para evitar consultas desnecessárias
     data_cache = {"df": None, "current_record": None}
 
     def get_meta_type_and_value(meta_id):
-        """Determina o tipo e valor da meta baseado nas tabelas especializadas"""
         try:
-            # Verificar se é meta de água
             query = "SELECT 1 FROM meta_agua WHERE id_meta = :meta_id"
             result = db.fetch_dataframe(query, {"meta_id": meta_id})
             if not result.empty:
                 return "Água"
             
-            # Verificar se é meta de sono
             query = "SELECT 1 FROM meta_sono WHERE id_meta = :meta_id"
             result = db.fetch_dataframe(query, {"meta_id": meta_id})
             if not result.empty:
                 return "Sono"
             
-            # Verificar se é meta de exercício
             query = "SELECT 1 FROM meta_exercicio WHERE id_meta = :meta_id"
             result = db.fetch_dataframe(query, {"meta_id": meta_id})
             if not result.empty:
@@ -226,7 +200,6 @@ def create_metas_crud_page(navigate_to_main_page):
             return "Indefinido"
 
     def load_metas_data():
-        """Carrega dados de metas"""
         query = """
         SELECT id_meta, valor
         FROM meta
@@ -240,7 +213,6 @@ def create_metas_crud_page(navigate_to_main_page):
             data_cache["df"] = df
 
             if not df.empty:
-                # Criar tabela HTML moderna
                 table_html = """
                 <div style='overflow-x: auto;'>
                 <table style='width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
@@ -259,13 +231,11 @@ def create_metas_crud_page(navigate_to_main_page):
                     valor = safe_get_value(row, 'valor', '')
                     tipo = get_meta_type_and_value(id_value)
                     
-                    # Ícones para cada tipo
                     tipo_icons = {
                         'Água': '💧', 'Sono': '💤', 'Exercícios': '🏃‍♂️'
                     }
                     tipo_display = f"{tipo_icons.get(tipo, '🎯')} {tipo}"
                     
-                    # Formatação do valor baseado no tipo
                     if tipo == "Água":
                         valor_display = f"{valor} ml"
                     elif tipo == "Sono":
@@ -310,7 +280,6 @@ def create_metas_crud_page(navigate_to_main_page):
             """
 
     def search_record(event):
-        """Busca registro por ID"""
         if not search_id_input.value:
             search_message_pane.object = """
             <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -336,11 +305,9 @@ def create_metas_crud_page(navigate_to_main_page):
                 record = df.iloc[0]
                 data_cache["current_record"] = record
                 
-                # Determinar tipo da meta
                 tipo = get_meta_type_and_value(search_id_input.value)
                 valor = safe_get_value(record, 'valor', '')
                 
-                # Preencher formulário de edição
                 edit_tipo_meta_input.value = tipo
                 
                 if tipo == "Sono":
@@ -350,11 +317,8 @@ def create_metas_crud_page(navigate_to_main_page):
                 elif tipo == "Exercícios":
                     edit_duracao_exercicio_input.value = int(valor) if valor.isdigit() else 30
                 
-                # Atualizar visibilidade dos campos
                 update_edit_fields_visibility()
                 
-                # Habilitar campos de edição
-                #edit_tipo_meta_input.disabled = False
                 edit_horas_sono_input.disabled = False
                 edit_quantidade_agua_input.disabled = False
                 edit_duracao_exercicio_input.disabled = False
@@ -382,7 +346,6 @@ def create_metas_crud_page(navigate_to_main_page):
             """
 
     def clear_edit_form():
-        """Limpa formulário de edição"""
         edit_tipo_meta_input.disabled = True
         edit_horas_sono_input.disabled = True
         edit_quantidade_agua_input.disabled = True
@@ -392,13 +355,11 @@ def create_metas_crud_page(navigate_to_main_page):
         data_cache["current_record"] = None
 
     def clear_search_form():
-        """Limpa formulário de busca"""
         search_id_input.value = None
         search_message_pane.object = ""
         clear_edit_form()
 
     def update_record(event):
-        """Atualiza registro"""
         if data_cache["current_record"] is None:
             search_message_pane.object = """
             <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -407,7 +368,6 @@ def create_metas_crud_page(navigate_to_main_page):
             """
             return
         
-        # Validar campo baseado no tipo
         tipo = edit_tipo_meta_input.value
         valor = None
         
@@ -440,7 +400,6 @@ def create_metas_crud_page(navigate_to_main_page):
             valor = str(edit_duracao_exercicio_input.value)
         
         try:
-            # Atualizar tabela principal
             query = """
             UPDATE meta 
             SET valor = :valor
@@ -460,7 +419,6 @@ def create_metas_crud_page(navigate_to_main_page):
             </div>
             """
             
-            # Recarregar dados
             load_metas_data()
             clear_search_form()
             
@@ -472,7 +430,6 @@ def create_metas_crud_page(navigate_to_main_page):
             """
 
     def delete_record(event):
-        """Exclui registro"""
         if data_cache["current_record"] is None:
             search_message_pane.object = """
             <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -482,7 +439,6 @@ def create_metas_crud_page(navigate_to_main_page):
             return
         
         try:
-            # A exclusão em cascata cuidará das tabelas especializadas
             query = """
             DELETE FROM meta 
             WHERE id_usuario = :user_id AND id_meta = :id_meta
@@ -500,7 +456,6 @@ def create_metas_crud_page(navigate_to_main_page):
             </div>
             """
             
-            # Recarregar dados
             load_metas_data()
             clear_search_form()
             
@@ -512,8 +467,6 @@ def create_metas_crud_page(navigate_to_main_page):
             """
 
     def add_meta(event):
-        """Adiciona nova meta"""
-        # Validar campo baseado no tipo
         tipo = tipo_meta_input.value
         valor = None
 
@@ -546,7 +499,6 @@ def create_metas_crud_page(navigate_to_main_page):
             valor = str(duracao_exercicio_input.value)
 
         try:
-            # Inserir na tabela principal
             query = """
             INSERT INTO meta (id_usuario, valor)
             VALUES (:user_id, :valor)
@@ -558,7 +510,6 @@ def create_metas_crud_page(navigate_to_main_page):
 
             db.execute_query(query, params)
 
-            # Obter o ID da meta recém-inserida
             query_id = """
             SELECT id_meta FROM meta
             WHERE id_usuario = :user_id AND valor = :valor
@@ -571,7 +522,6 @@ def create_metas_crud_page(navigate_to_main_page):
             if not result_df.empty:
                 meta_id = int(result_df.iloc[0]['id_meta'])
 
-                # Inserir na tabela especializada
                 if tipo == "Água":
                     query_specialized = "INSERT INTO meta_agua (id_meta) VALUES (:meta_id)"
                 elif tipo == "Sono":
@@ -594,7 +544,6 @@ def create_metas_crud_page(navigate_to_main_page):
                 """
                 return
 
-            # Recarregar dados e limpar formulário
             load_metas_data()
             clear_form()
 
@@ -606,13 +555,11 @@ def create_metas_crud_page(navigate_to_main_page):
             """
 
     def clear_form():
-        """Limpa formulário de inserção"""
         horas_sono_input.value = 8
         quantidade_agua_input.value = 2000
         duracao_exercicio_input.value = 30
         message_pane.object = ""
 
-    # Configurar eventos dos botões
     add_button.on_click(add_meta)
     clear_button.on_click(clear_form)
     search_button.on_click(search_record)
@@ -620,17 +567,14 @@ def create_metas_crud_page(navigate_to_main_page):
     delete_button.on_click(delete_record)
     clear_search_button.on_click(clear_search_form)
 
-    # Carregar dados iniciais
     load_metas_data()
     
-    # Seção de registros
     records_section = pn.Column(
         pn.pane.HTML("<h2 class='section-header'>📋 Suas Metas</h2>"),
         table_pane,
         css_classes=['section-card']
     )
     
-    # Tab de Cadastro
     cadastro_tab = pn.Column(
         pn.Row(
             tipo_meta_input,
@@ -654,7 +598,6 @@ def create_metas_crud_page(navigate_to_main_page):
         )
     )
     
-    # Tab de Editar/Excluir
     edit_tab = pn.Column(
         pn.Row(
             search_id_input,
@@ -686,21 +629,18 @@ def create_metas_crud_page(navigate_to_main_page):
         )
     )
     
-    # Criando as tabs
     tabs = pn.Tabs(
         ("📝 Cadastro", cadastro_tab),
         ("✏️ Editar/Excluir", edit_tab),
         dynamic=True
     )
     
-    # Seção de formulário com tabs
     form_section = pn.Column(
         pn.pane.HTML("<h2 class='section-header'>📝 Formulário de Metas</h2>"),
         tabs,
         css_classes=['section-card']
     )
 
-    # Layout principal
     main_content = pn.Column(
         header,
         records_section,
@@ -709,7 +649,6 @@ def create_metas_crud_page(navigate_to_main_page):
         sizing_mode='stretch_width'
     )
     
-    # Container com botão voltar e elementos ocultos
     return pn.Column(
         pn.Row(
             pn.Spacer(),

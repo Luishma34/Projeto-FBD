@@ -6,33 +6,26 @@ from auth import current_user
 from utils import format_date_column, safe_get_value
 
 def create_alimentacao_crud_page(navigate_to_main_page):
-    """Cria a página de CRUD para registros de alimentação"""
 
-    # Opções para o tipo de refeição
     tipos_refeicao = ["Café da Manhã", "Almoço", "Jantar", "Lanche", "Ceia", "Outro"]
 
-    # Widgets para filtros
     date_filter = pn.widgets.DatePicker(name="📅 Filtrar por Data", value=None, width=200)
     tipo_filter = pn.widgets.Select(name="🍲 Filtrar por Tipo", options=["Todos"] + tipos_refeicao, value="Todos", width=200)
 
-    # Widgets para inserção/edição
     date_input = pn.widgets.DatePicker(name="📅 Data", value=date.today(), width=200)
     hora_input = pn.widgets.TextInput(name="⏰ Hora (HH:MM)", value=datetime.now().strftime("%H:%M"), width=200)
     tipo_input = pn.widgets.Select(name="🍲 Tipo de Refeição", options=tipos_refeicao, width=200)
     calorias_input = pn.widgets.IntInput(name="🔥 Calorias", value=0, start=0, width=200)
     descricao_input = pn.widgets.TextAreaInput(name="📝 Descrição (um item por linha)", height=120, width=420, placeholder="Ex: Arroz\nFeijão\nBife acebolado")
 
-    # Widgets para busca e edição
     search_id_input = pn.widgets.IntInput(name="🔍 Buscar por ID", value=None, width=200, placeholder="Digite o ID do registro")
     
-    # Widgets para edição (inicialmente desabilitados)
     edit_date_input = pn.widgets.DatePicker(name="📅 Data", width=200, disabled=True)
     edit_hora_input = pn.widgets.TextInput(name="⏰ Hora (HH:MM)", width=200, disabled=True)
     edit_tipo_input = pn.widgets.Select(name="🍲 Tipo de Refeição", options=tipos_refeicao, width=200, disabled=True)
     edit_calorias_input = pn.widgets.IntInput(name="🔥 Calorias", start=0, width=200, disabled=True)
     edit_descricao_input = pn.widgets.TextAreaInput(name="📝 Descrição", height=120, width=420, disabled=True)
 
-    # Botões
     add_button = pn.widgets.Button(name="➕ Adicionar", button_type="primary", width=120, height=40)
     back_button = pn.widgets.Button(name="🏠 Voltar", button_type="warning", width=120, height=40)
     clear_button = pn.widgets.Button(name="🧹 Limpar", button_type="warning", width=120, height=40)
@@ -41,16 +34,13 @@ def create_alimentacao_crud_page(navigate_to_main_page):
     delete_button = pn.widgets.Button(name="🗑️ Excluir", button_type="danger", width=120, height=40, disabled=True)
     clear_search_button = pn.widgets.Button(name="🧹 Limpar Busca", button_type="warning", width=120, height=40)
 
-    # Painéis de mensagem
     message_pane = pn.pane.HTML("", width=500)
     search_message_pane = pn.pane.HTML("", width=500)
 
-    # Tabela para exibir dados
     table_pane = pn.pane.HTML("", sizing_mode="stretch_width")
     data_cache = {"df": None, "current_record": None}
 
     def load_alimentacao_data():
-        """Carrega dados de alimentação com filtros, incluindo descrições agregadas."""
         query = """
         SELECT 
             ra.id_registro_alimentacao, 
@@ -97,9 +87,7 @@ def create_alimentacao_crud_page(navigate_to_main_page):
             table_pane.object = f"<div class='error-box'><strong>❌ Erro ao carregar dados:</strong> {e}</div>"
 
     def add_alimentacao(event):
-        """Adiciona um novo registro de alimentação e suas descrições."""
         try:
-            # Validações
             calorias = calorias_input.value
             if calorias is not None and calorias < 0:
                 message_pane.object = "<div class='warning-box'>⚠️ Calorias devem ser um número positivo.</div>"
@@ -111,7 +99,6 @@ def create_alimentacao_crud_page(navigate_to_main_page):
                 message_pane.object = "<div class='warning-box'>⚠️ A descrição é obrigatória.</div>"
                 return
 
-            # Inserir registro principal
             query_reg = "INSERT INTO registro_alimentacao (id_usuario, data, hora, tipo, calorias) VALUES (:uid, :data, :hora, :tipo, :cal)"
             params_reg = {"uid": current_user["id"], "data": date_input.value, "hora": hora_val, "tipo": tipo_input.value, "cal": calorias}
             db.execute_query(query_reg, params_reg)
@@ -129,7 +116,6 @@ def create_alimentacao_crud_page(navigate_to_main_page):
             print(result_df)
             new_id = int(result_df.iloc[0]['id_registro_alimentacao'])
 
-            # Inserir descrições
             query_desc = "INSERT INTO registro_alimentacao_descricao (id_registro_alimentacao, descricao) VALUES (:id, :desc)"
             for desc in descricoes:
                 db.execute_query(query_desc, {"id": new_id, "desc": desc})
@@ -143,7 +129,6 @@ def create_alimentacao_crud_page(navigate_to_main_page):
             message_pane.object = f"<div class='error-box'>❌ Erro ao adicionar registro: {e}</div>"
 
     def search_record(event):
-        """Busca um registro de alimentação por ID para edição."""
         record_id = search_id_input.value
         if not record_id:
             search_message_pane.object = "<div class='warning-box'>⚠️ Por favor, digite um ID para buscar.</div>"
@@ -168,7 +153,6 @@ def create_alimentacao_crud_page(navigate_to_main_page):
                 edit_calorias_input.value = record['calorias']
                 edit_descricao_input.value = record['descricao_agg'] or ""
                 
-                # Habilitar campos
                 for w in [edit_date_input, edit_hora_input, edit_tipo_input, edit_calorias_input, edit_descricao_input, edit_button, delete_button]:
                     w.disabled = False
                 search_message_pane.object = f"<div class='success-box'>✅ Registro ID {record_id} encontrado!</div>"
@@ -179,7 +163,6 @@ def create_alimentacao_crud_page(navigate_to_main_page):
             search_message_pane.object = f"<div class='error-box'>❌ Erro na busca: {e}</div>"
 
     def update_record(event):
-        """Atualiza um registro de alimentação existente."""
         record_id = search_id_input.value
         if not record_id or data_cache["current_record"] is None:
             search_message_pane.object = "<div class='warning-box'>⚠️ Nenhum registro selecionado para edição.</div>"
@@ -197,12 +180,10 @@ def create_alimentacao_crud_page(navigate_to_main_page):
                 search_message_pane.object = "<div class='warning-box'>⚠️ A descrição é obrigatória.</div>"
                 return
 
-            # Atualizar registro principal
             query_upd = "UPDATE registro_alimentacao SET data=:data, hora=:hora, tipo=:tipo, calorias=:cal WHERE id_registro_alimentacao=:rid AND id_usuario=:uid"
             params_upd = {"data": edit_date_input.value, "hora": hora_val, "tipo": edit_tipo_input.value, "cal": int(calorias), "rid": record_id, "uid": current_user["id"]}
             db.execute_query(query_upd, params_upd)
 
-            # Excluir descrições antigas e inserir as novas
             db.execute_query("DELETE FROM registro_alimentacao_descricao WHERE id_registro_alimentacao=:rid", {"rid": record_id})
             query_desc = "INSERT INTO registro_alimentacao_descricao (id_registro_alimentacao, descricao) VALUES (:rid, :desc)"
             for desc in descricoes:
@@ -215,7 +196,6 @@ def create_alimentacao_crud_page(navigate_to_main_page):
             search_message_pane.object = f"<div class='error-box'>❌ Erro ao atualizar: {e}</div>"
 
     def delete_record(event):
-        """Exclui um registro de alimentação (ON DELETE CASCADE cuidará das descrições)."""
         record_id = search_id_input.value
         if not record_id or data_cache["current_record"] is None:
             search_message_pane.object = "<div class='warning-box'>⚠️ Nenhum registro selecionado para exclusão.</div>"
@@ -257,10 +237,7 @@ def create_alimentacao_crud_page(navigate_to_main_page):
 
     def back_to_main(event):
         navigate_to_main_page()
-        # from pages.main_page import create_main_page
-        # main_layout.objects = [create_main_page(main_layout)]
 
-    # Handlers de eventos
     add_button.on_click(add_alimentacao)
     back_button.on_click(back_to_main)
     clear_button.on_click(lambda e: clear_form())
@@ -271,10 +248,8 @@ def create_alimentacao_crud_page(navigate_to_main_page):
     date_filter.param.watch(lambda e: load_alimentacao_data(), 'value')
     tipo_filter.param.watch(lambda e: load_alimentacao_data(), 'value')
 
-    # Carregamento inicial
     load_alimentacao_data()
 
-    # Layout da página
     header = pn.pane.HTML("<h1>🍎 Gerenciamento de Alimentação</h1>")
     
     filters_section = pn.Column(pn.pane.HTML("<h2 class='section-header'>🔍 Filtros</h2>"), pn.Row(date_filter, tipo_filter), css_classes=['section-card'])

@@ -5,9 +5,6 @@ from auth import current_user, logout_user, hash_password
 from utils import format_date_column, safe_get_value
 
 def create_profile_page(navigate_to_main_page, navigate_to_login):
-    """Cria a página para o usuário editar suas informações ou excluir sua conta."""
-
-    # --- Widgets para Edição de Perfil ---
     nome_input = pn.widgets.TextInput(
         name="👤 Nome", 
         width=300, 
@@ -16,7 +13,7 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
     email_input = pn.widgets.TextInput(
         name="📧 Email", 
         width=300, 
-        disabled=True # Email não pode ser alterado
+        disabled=True
     )
     data_nascimento_input = pn.widgets.DatePicker(
         name="🎂 Data de Nascimento", 
@@ -58,12 +55,10 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
     )
 
 
-    # --- Panes de Mensagem ---
     message_pane = pn.pane.HTML("", width=620)
     delete_message_pane = pn.pane.HTML("", width=620)
 
     def load_user_data():
-        """Carrega os dados do usuário logado nos campos do formulário."""
         try:
             user_id = current_user.get("id")
             if not user_id:
@@ -75,7 +70,6 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
             user_data = results[0] if results else None
 
             if user_data:
-                #nome_input.value = user_data["nome"]
                 nome_input.value = user_data[0]
                 email_input.value = user_data[1]
                 data_nascimento_input.value = user_data[2]
@@ -87,7 +81,6 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
             message_pane.object = f"<div class='error-message'>Erro ao carregar perfil: {e}</div>"
 
     def update_profile(event):
-        """Atualiza as informações do perfil do usuário no banco de dados."""
         if senha_input.value != confirmar_senha_input.value:
             message_pane.object = "<div class='error-message'>As senhas não coincidem.</div>"
             return
@@ -97,7 +90,6 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
             return
 
         try:
-            # Atualiza os dados básicos primeiro
             base_query = """
             UPDATE usuario
             SET nome = :nome, data_nascimento = :data_nascimento, sexo = :sexo
@@ -111,7 +103,6 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
             }
             db.execute_query(base_query, params)
 
-            # Se uma nova senha foi fornecida, atualiza a senha
             if senha_input.value:
                 hashed_password = hash_password(senha_input.value)
                 password_query = "UPDATE usuario SET senha = :senha WHERE id_usuario = :user_id"
@@ -119,11 +110,9 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
 
             message_pane.object = "<div class='success-message'>Perfil atualizado com sucesso!</div>"
             
-            # Limpa os campos de senha após a atualização
             senha_input.value = ""
             confirmar_senha_input.value = ""
             
-            # Atualiza o nome no estado da aplicação
             current_user["name"] = nome_input.value
 
         except Exception as e:
@@ -131,13 +120,11 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
 
 
     def delete_account(event):
-        """Exclui a conta do usuário e todos os dados associados."""
         try:
             user_id = current_user.get("id")
             query = "DELETE FROM usuario WHERE id_usuario = :user_id"
             db.execute_query(query, {"user_id": user_id})
             
-            # Desloga o usuário e redireciona para a tela de login
             logout_user()
             navigate_to_login()
 
@@ -146,20 +133,14 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
 
 
     def back_to_main(event):
-        """Volta para a tela principal."""
-        # from pages.main_page import create_main_page
-        # main_layout.objects = [create_main_page(main_layout)]
         navigate_to_main_page()
 
-    # --- Event Handlers ---
     update_button.on_click(update_profile)
     confirm_delete_button.on_click(delete_account)
     back_button.on_click(back_to_main)
 
-    # Carregar dados do usuário ao iniciar a página
     load_user_data()
 
-    # --- Layout da Página ---
     header = pn.pane.HTML("""
     <div class="profile-header">
         <h1 class="profile-title">👤 Meu Perfil</h1>

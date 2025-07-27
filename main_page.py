@@ -3,15 +3,11 @@ from auth import current_user
 
 
 def create_main_page(navigate_to_login, navigate_to_profile, navigate_to_humor, navigate_to_metas, navigate_to_alimentacao):
-    """Cria a página principal após login"""
 
 
     def logout(event):
         current_user["id"] = None
         current_user["nome"] = None
-        # Importação dinâmica para evitar dependência circular
-        # from login_page import create_login_page
-        # main_layout.objects = [create_login_page(main_layout)]
         navigate_to_login()
 
     logout_button = pn.widgets.Button(
@@ -54,35 +50,22 @@ def create_main_page(navigate_to_login, navigate_to_profile, navigate_to_humor, 
     )
 
     def open_humor_crud(event):
-        # from humor_page import create_humor_crud_page
-        # humor_page = create_humor_crud_page(main_layout)
-        # main_layout.objects = [humor_page]
         navigate_to_humor()
 
     def open_profile(event):
-        # from profile_page import create_profile_page
-        # profile_page = create_profile_page(main_layout)
-        # main_layout.objects = [profile_page]
         navigate_to_profile()
     profile_button.on_click(open_profile)
 
     def open_alimentacao_crud(event):
-        # from alimentacao_page import create_alimentacao_crud_page
-        # alimentacao_page = create_alimentacao_crud_page(main_layout)
-        # main_layout.objects = [alimentacao_page]
         navigate_to_alimentacao()
    
     def open_metas_crud(event):
-        # from metas_page import create_metas_crud_page
-        # metas_page = create_metas_crud_page(main_layout)
-        # main_layout.objects = [metas_page]
         navigate_to_metas()
 
     alimentacao_button.on_click(open_alimentacao_crud)
     humor_button.on_click(open_humor_crud)
     metas_button.on_click(open_metas_crud)
 
-    # Header de boas-vindas
     welcome_header = pn.pane.HTML(f"""
     <div class="welcome-header">
         <h1 class="welcome-title">👋 Bem-vindo, {current_user['nome']}!</h1>
@@ -90,7 +73,6 @@ def create_main_page(navigate_to_login, navigate_to_profile, navigate_to_humor, 
     </div>
     """)
 
-    # Card de funcionalidades disponíveis
     available_card = pn.Column(
         pn.pane.HTML("<h2 class='section-title'>🚀 Funcionalidades Disponíveis</h2>"),
         pn.Spacer(height=20),
@@ -117,7 +99,6 @@ def create_main_page(navigate_to_login, navigate_to_profile, navigate_to_humor, 
         align='center',
     )
 
-    # Layout principal
     main_content = pn.Column(
         welcome_header,
         available_card,
@@ -126,7 +107,6 @@ def create_main_page(navigate_to_login, navigate_to_profile, navigate_to_humor, 
         align='center'
     )
 
-    # Container com logout button posicionado
     return pn.Column(
         pn.Row(
             pn.Spacer(),

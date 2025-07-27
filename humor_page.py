@@ -6,9 +6,6 @@ from auth import current_user
 from utils import format_date_column, safe_get_value
 
 def create_humor_crud_page(navigate_to_main_page):
-    """Cria a página de CRUD para registros de humor"""
-    
-    # Widgets para filtros
     date_filter = pn.widgets.DatePicker(
         name="📅 Filtrar por Data", 
         value=None,
@@ -21,7 +18,6 @@ def create_humor_crud_page(navigate_to_main_page):
         width=200
     )
     
-    # Widgets para inserção/edição
     date_input = pn.widgets.DatePicker(
         name="📅 Data", 
         value=date.today(),
@@ -39,7 +35,6 @@ def create_humor_crud_page(navigate_to_main_page):
         placeholder="Descreva como você se sente..."
     )
 
-    # Widgets para busca e edição
     search_id_input = pn.widgets.IntInput(
         name="🔍 Buscar por ID",
         value=None,
@@ -47,7 +42,6 @@ def create_humor_crud_page(navigate_to_main_page):
         placeholder="Digite o ID do registro"
     )
     
-    # Widgets para edição (inicialmente vazios)
     edit_date_input = pn.widgets.DatePicker(
         name="📅 Data", 
         value=date.today(),
@@ -68,7 +62,6 @@ def create_humor_crud_page(navigate_to_main_page):
         disabled=True
     )
     
-    # Botões com ícones
     add_button = pn.widgets.Button(
         name="➕ Adicionar",
         button_type="primary",
@@ -88,7 +81,6 @@ def create_humor_crud_page(navigate_to_main_page):
         height=40
     )
     
-    # Novos botões para busca, edição e exclusão
     search_button = pn.widgets.Button(
         name="🔍 Buscar",
         button_type="primary",
@@ -116,18 +108,14 @@ def create_humor_crud_page(navigate_to_main_page):
         height=40
     )
 
-    # Mensagens
     message_pane = pn.pane.HTML("", width=500)
     search_message_pane = pn.pane.HTML("", width=500)
 
-    # Tabela para exibir dados
     table_pane = pn.pane.HTML("", sizing_mode="stretch_width")
 
-    # Cache dos dados para evitar consultas desnecessárias
     data_cache = {"df": None, "current_record": None}
 
     def load_humor_data():
-        """Carrega dados de humor com filtros"""
         query = """
         SELECT id_humor, data, tipo_humor, observacao
         FROM registro_humor
@@ -150,11 +138,9 @@ def create_humor_crud_page(navigate_to_main_page):
             data_cache["df"] = df
 
             if not df.empty:
-                # Usar função auxiliar para formatar datas com segurança
                 df_display = df.copy()
                 df_display = format_date_column(df_display, 'data')
 
-                # Criar tabela HTML moderna
                 table_html = """
                 <div style='overflow-x: auto;'>
                 <table style='width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
@@ -175,13 +161,11 @@ def create_humor_crud_page(navigate_to_main_page):
                     tipo_humor = safe_get_value(row, 'tipo_humor', '')
                     observacao = safe_get_value(row, 'observacao', '')
 
-                    # Truncar observação se muito longa
                     if len(observacao) > 45:
                         observacao_display = observacao[:42] + "..."
                     else:
                         observacao_display = observacao
 
-                    # Adicionar emoji baseado no humor
                     humor_icons = {
                         'Feliz': '😊', 'Triste': '😢', 'Ansioso': '😰',
                         'Calmo': '😌', 'Irritado': '😠', 'Animado': '🤩'
@@ -224,7 +208,6 @@ def create_humor_crud_page(navigate_to_main_page):
             """
 
     def search_record(event):
-        """Busca registro por ID"""
         if not search_id_input.value:
             search_message_pane.object = """
             <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -250,12 +233,10 @@ def create_humor_crud_page(navigate_to_main_page):
                 record = df.iloc[0]
                 data_cache["current_record"] = record
                 
-                # Preencher campos de edição
                 edit_date_input.value = record['data']
                 edit_humor_input.value = record['tipo_humor']
                 edit_observacao_input.value = record['observacao'] or ""
                 
-                # Habilitar campos e botões de edição
                 edit_date_input.disabled = False
                 edit_humor_input.disabled = False
                 edit_observacao_input.disabled = False
@@ -283,7 +264,6 @@ def create_humor_crud_page(navigate_to_main_page):
             """
 
     def clear_edit_form():
-        """Limpa formulário de edição"""
         edit_date_input.value = date.today()
         edit_humor_input.value = None
         edit_observacao_input.value = ""
@@ -295,7 +275,6 @@ def create_humor_crud_page(navigate_to_main_page):
         data_cache["current_record"] = None
 
     def clear_search_form():
-        """Limpa formulário de busca"""
         search_id_input.value = None
         clear_edit_form()
         search_message_pane.object = """
@@ -305,7 +284,6 @@ def create_humor_crud_page(navigate_to_main_page):
         """
 
     def update_record(event):
-        """Atualiza registro existente"""
         if not data_cache["current_record"] is not None:
             search_message_pane.object = """
             <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -344,7 +322,6 @@ def create_humor_crud_page(navigate_to_main_page):
             </div>
             """
             
-            # Recarregar dados
             load_humor_data()
             clear_search_form()
             
@@ -356,7 +333,6 @@ def create_humor_crud_page(navigate_to_main_page):
             """
 
     def delete_record(event):
-        """Exclui registro"""
         if not data_cache["current_record"] is not None:
             search_message_pane.object = """
             <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -383,7 +359,6 @@ def create_humor_crud_page(navigate_to_main_page):
             </div>
             """
             
-            # Recarregar dados
             load_humor_data()
             clear_search_form()
             
@@ -395,7 +370,6 @@ def create_humor_crud_page(navigate_to_main_page):
             """
 
     def add_humor(event):
-        """Adiciona novo registro de humor"""
         if not humor_input.value:
             message_pane.object = """
             <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -424,7 +398,6 @@ def create_humor_crud_page(navigate_to_main_page):
             </div>
             """
             
-            # Limpar formulário e recarregar dados
             clear_form()
             load_humor_data()
             
@@ -442,7 +415,6 @@ def create_humor_crud_page(navigate_to_main_page):
         
         add_button.visible = True
 
-        # Limpar mensagens
         message_pane.object = """
         <div style='color: #0c5460; background: #d1ecf1; border: 1px solid #b6d4da; padding: 10px; border-radius: 5px; text-align: center;'>
             📝 Formulário pronto para novo registro
@@ -450,13 +422,8 @@ def create_humor_crud_page(navigate_to_main_page):
         """
     
     def back_to_main(event):
-        """Volta para a tela principal"""
-        # Importação dinâmica para evitar dependência circular
-        # from pages.main_page import create_main_page
-        # main_layout.objects = [create_main_page(main_layout)]
         navigate_to_main_page()
     
-    # Event handlers
     add_button.on_click(add_humor)
     back_button.on_click(back_to_main)
     clear_button.on_click(lambda e: clear_form())
@@ -465,25 +432,21 @@ def create_humor_crud_page(navigate_to_main_page):
     delete_button.on_click(delete_record)
     clear_search_button.on_click(lambda e: clear_search_form())
 
-    # Filtros
     def apply_filters(event):
         load_humor_data()
 
     date_filter.param.watch(apply_filters, 'value')
     humor_filter.param.watch(apply_filters, 'value')
 
-    # Carregar dados iniciais
     load_humor_data()
 
 
-    # Header da página
     header = pn.pane.HTML("""
     <div class="humor-header">
         <h1 class="humor-title">📊 Gerenciamento de Registros de Humor</h1>
     </div>
     """)
     
-    # Seção de filtros
     filters_section = pn.Column(
         pn.pane.HTML("<h2 class='section-header'>🔍 Filtros</h2>"),
         pn.Row(
@@ -495,7 +458,6 @@ def create_humor_crud_page(navigate_to_main_page):
         css_classes=['section-card']
     )
     
-    # Seção de registros
     records_section = pn.Column(
         pn.pane.HTML("<h2 class='section-header'>📋 Registros</h2>"),
         pn.Column(
@@ -505,7 +467,6 @@ def create_humor_crud_page(navigate_to_main_page):
         css_classes=['section-card']
     )
     
-    # Tab de Cadastro
     cadastro_tab = pn.Column(
         pn.Row(
             date_input, 
@@ -534,7 +495,6 @@ def create_humor_crud_page(navigate_to_main_page):
         )
     )
     
-    # Tab de Editar/Excluir
     edit_tab = pn.Column(
         pn.Row(
             search_id_input,
@@ -571,21 +531,18 @@ def create_humor_crud_page(navigate_to_main_page):
         )
     )
     
-    # Criando as tabs
     tabs = pn.Tabs(
         ("📝 Cadastro", cadastro_tab),
         ("✏️ Editar/Excluir", edit_tab),
         dynamic=True
     )
     
-    # Seção de formulário com tabs
     form_section = pn.Column(
         pn.pane.HTML("<h2 class='section-header'>📝 Formulário de Registro</h2>"),
         tabs,
         css_classes=['section-card']
     )
 
-    # Layout principal
     main_content = pn.Column(
         header,
         filters_section,
@@ -595,7 +552,6 @@ def create_humor_crud_page(navigate_to_main_page):
         sizing_mode='stretch_width'
     )
     
-    # Container com botão voltar e elementos ocultos
     return pn.Column(
         pn.Row(
             pn.Spacer(),

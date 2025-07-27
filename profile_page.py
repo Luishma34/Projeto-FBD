@@ -1,7 +1,7 @@
 import panel as pn
 from datetime import date
 from database import db
-from auth import current_user, logout_user, hash_password
+from auth import current_user, logout_user, hash_password, update_local_name
 from utils import format_date_column, safe_get_value
 
 def create_profile_page(navigate_to_main_page, navigate_to_login):
@@ -113,7 +113,7 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
             senha_input.value = ""
             confirmar_senha_input.value = ""
             
-            current_user["name"] = nome_input.value
+            update_local_name(nome_input.value)
 
         except Exception as e:
             message_pane.object = f"<div class='error-message'>Erro ao atualizar perfil: {e}</div>"
@@ -153,24 +153,14 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
         pn.Row(nome_input, email_input),
         pn.Row(data_nascimento_input, sexo_input),
         pn.Row(senha_input, confirmar_senha_input),
-        pn.layout.VSpacer(height=15),
-        update_button,
-        pn.layout.VSpacer(height=10),
+        pn.Row(update_button, confirm_delete_button),
         message_pane,
         css_classes=['section-card']
-    )
-
-    delete_section = pn.Column(
-        confirm_delete_button,
-        pn.layout.VSpacer(height=10),
-        delete_message_pane,
-        css_classes=['section-card', 'danger-zone']
     )
 
     main_content = pn.Column(
         header,
         edit_section,
-        delete_section,
         css_classes=['profile-container'],
         sizing_mode='stretch_width'
     )

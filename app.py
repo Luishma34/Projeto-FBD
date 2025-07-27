@@ -1,7 +1,5 @@
 import panel as pn
-from auth import create_test_user
 from login_page import create_login_page
-
 from main_page import create_main_page
 from profile_page import create_profile_page
 from humor_page import create_humor_crud_page
@@ -11,8 +9,6 @@ from metas_page import create_metas_crud_page
 pn.extension('tabulator')
 
 pn.config.theme = 'default'
-
-create_test_user()
 
 main_layout = pn.Column(
     create_login_page(None),

@@ -3,6 +3,9 @@ from database import db
 
 current_user = {"id": None, "nome": None}
 
+def update_local_name(name):
+    current_user["nome"] = name
+
 def logout_user():
     current_user["id"] = None
     current_user["nome"] = None

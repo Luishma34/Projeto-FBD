@@ -73,18 +73,52 @@ def create_alimentacao_crud_page(navigate_to_main_page):
                 df_display = format_date_column(df_display, 'data')
                 df_display['hora'] = pd.to_datetime(df_display['hora'].astype(str)).dt.strftime('%H:%M')
                 
-                table_html = "<div style='overflow-x: auto;'><table class='custom-table'><thead><tr><th>ID</th><th>Data</th><th>Hora</th><th>Tipo</th><th>Descrição</th><th>Calorias</th></tr></thead><tbody>"
+                table_html = """
+                <div style='overflow-x: auto;'>
+                <table style='width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                <thead>
+                    <tr style='background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white;'>
+                        <th style='padding: 15px; text-align: left; font-weight: 600;'>🆔 ID</th>
+                        <th style='padding: 15px; text-align: left; font-weight: 600;'>📅 Data</th>
+                        <th style='padding: 15px; text-align: left; font-weight: 600;'>⏰ Hora</th>
+                        <th style='padding: 15px; text-align: left; font-weight: 600;'>🍲 Tipo</th>
+                        <th style='padding: 15px; text-align: left; font-weight: 600;'>📝 Descrição</th>
+                        <th style='padding: 15px; text-align: left; font-weight: 600;'>🔥 Calorias</th>
+                    </tr>
+                </thead>
+                <tbody>
+                """
                 for i, row in df_display.iterrows():
                     desc = safe_get_value(row, 'descricao', '')
                     desc_display = (desc[:42] + '...') if len(desc) > 45 else desc
                     row_color = '#f8f9fa' if i % 2 == 0 else 'white'
-                    table_html += f"<tr style='background-color: {row_color};'><td>{safe_get_value(row, 'id_registro_alimentacao')}</td><td>{safe_get_value(row, 'data')}</td><td>{safe_get_value(row, 'hora')}</td><td>{safe_get_value(row, 'tipo')}</td><td>{desc_display}</td><td>{safe_get_value(row, 'calorias')}</td></tr>"
+                    table_html += f"""
+                    <tr style='background-color: {row_color}; border-bottom: 1px solid #dee2e6;'
+                        onmouseover='this.style.backgroundColor="#e3f2fd"'
+                        onmouseout='this.style.backgroundColor="{row_color}" '>
+                        <td style='padding: 12px; border-right: 1px solid #dee2e6;'>{safe_get_value(row, 'id_registro_alimentacao')}</td>
+                        <td style='padding: 12px; border-right: 1px solid #dee2e6;'>{safe_get_value(row, 'data')}</td>
+                        <td style='padding: 12px; border-right: 1px solid #dee2e6;'>{safe_get_value(row, 'hora')}</td>
+                        <td style='padding: 12px; border-right: 1px solid #dee2e6;'>{safe_get_value(row, 'tipo')}</td>
+                        <td style='padding: 12px; border-right: 1px solid #dee2e6;'>{desc_display}</td>
+                        <td style='padding: 12px;'>{safe_get_value(row, 'calorias')}</td>
+                    </tr>
+                    """
                 table_html += "</tbody></table></div>"
                 table_pane.object = table_html
             else:
-                table_pane.object = "<div class='no-records'><h3>📭 Nenhum registro encontrado</h3><p>Adicione sua primeira refeição para começar!</p></div>"
+                table_pane.object = """
+                <div style='text-align: center; padding: 40px; color: #6c757d; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;'>
+                    <h3>📭 Nenhum registro encontrado</h3>
+                    <p>Adicione sua primeira refeição para começar!</p>
+                </div>
+                """
         except Exception as e:
-            table_pane.object = f"<div class='error-box'><strong>❌ Erro ao carregar dados:</strong> {e}</div>"
+            table_pane.object = f"""
+            <div style='color: #dc3545; padding: 20px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px;'>
+                <strong>❌ Erro ao carregar dados:</strong> {str(e)}
+            </div>
+            """
 
     def add_alimentacao(event):
         try:
@@ -250,31 +284,78 @@ def create_alimentacao_crud_page(navigate_to_main_page):
 
     load_alimentacao_data()
 
-    header = pn.pane.HTML("<h1>🍎 Gerenciamento de Alimentação</h1>")
+    header = pn.pane.HTML("""
+    <div class="humor-header">
+        <h1 class="humor-title">🍎 Gerenciamento de Alimentação</h1>
+    </div>
+    """)
     
-    filters_section = pn.Column(pn.pane.HTML("<h2 class='section-header'>🔍 Filtros</h2>"), pn.Row(date_filter, tipo_filter), css_classes=['section-card'])
-    records_section = pn.Column(pn.pane.HTML("<h2 class='section-header'>📋 Registros</h2>"), table_pane, css_classes=['section-card'])
+    filters_section = pn.Column(
+        pn.pane.HTML("<h2 class='section-header'>🔍 Filtros</h2>"),
+        pn.Row(
+            date_filter, 
+            tipo_filter,
+            align='center',
+            margin=(0, 0, 10, 0)
+        ),
+        css_classes=['section-card']
+    )
+    
+    records_section = pn.Column(
+        pn.pane.HTML("<h2 class='section-header'>📋 Registros</h2>"),
+        pn.Column(
+            table_pane,
+            css_classes=['data-table']
+        ),
+        css_classes=['section-card']
+    )
 
     cadastro_tab = pn.Column(
-        pn.Row(date_input, hora_input),
-        pn.Row(tipo_input, calorias_input),
-        descricao_input,
-        pn.Row(add_button, clear_button, align='center'),
-        message_pane
+        pn.Row(date_input, hora_input, align='center', margin=(0, 0, 15, 0)),
+        pn.Row(tipo_input, calorias_input, align='center', margin=(0, 0, 15, 0)),
+        pn.Row(pn.Spacer(), descricao_input, pn.Spacer(), align='center', margin=(0, 0, 20, 0)),
+        pn.Row(add_button, clear_button, align='center', margin=(0, 0, 15, 0)),
+        pn.Row(pn.Spacer(), message_pane, pn.Spacer(), align='center')
     )
     
     edit_tab = pn.Column(
-        pn.Row(search_id_input, search_button, align='end'),
-        pn.pane.HTML("<hr>"),
-        pn.Row(edit_date_input, edit_hora_input),
-        pn.Row(edit_tipo_input, edit_calorias_input),
-        edit_descricao_input,
-        pn.Row(edit_button, delete_button, clear_search_button, align='center'),
-        search_message_pane
+        pn.Row(search_id_input, search_button, align='center', margin=(0, 0, 15, 0)),
+        pn.pane.HTML("<hr style='margin: 20px 0; border: 1px solid #dee2e6;'>"),
+        pn.Row(edit_date_input, edit_hora_input, align='center', margin=(0, 0, 15, 0)),
+        pn.Row(edit_tipo_input, edit_calorias_input, align='center', margin=(0, 0, 15, 0)),
+        pn.Row(pn.Spacer(), edit_descricao_input, pn.Spacer(), align='center', margin=(0, 0, 20, 0)),
+        pn.Row(edit_button, delete_button, clear_search_button, align='center', margin=(0, 0, 15, 0)),
+        pn.Row(pn.Spacer(), search_message_pane, pn.Spacer(), align='center')
     )
     
-    form_section = pn.Column(pn.pane.HTML("<h2 class='section-header'>📝 Formulário de Registro</h2>"), pn.Tabs(("📝 Cadastro", cadastro_tab), ("✏️ Editar/Excluir", edit_tab)), css_classes=['section-card'])
-
-    main_content = pn.Column(header, filters_section, records_section, form_section, css_classes=['humor-container'], sizing_mode='stretch_width')
+    tabs = pn.Tabs(
+        ("📝 Cadastro", cadastro_tab),
+        ("✏️ Editar/Excluir", edit_tab),
+        dynamic=True
+    )
     
-    return pn.Column(pn.Row(pn.Spacer(), back_button, margin=(10, 20, 0, 0)), main_content, sizing_mode='stretch_width', min_height=700)
+    form_section = pn.Column(
+        pn.pane.HTML("<h2 class='section-header'>📝 Formulário de Registro</h2>"), 
+        tabs, 
+        css_classes=['section-card']
+    )
+
+    main_content = pn.Column(
+        header, 
+        filters_section, 
+        records_section, 
+        form_section, 
+        css_classes=['humor-container'], 
+        sizing_mode='stretch_width'
+    )
+    
+    return pn.Column(
+        pn.Row(
+            pn.Spacer(), 
+            back_button, 
+            margin=(10, 20, 0, 0)
+        ), 
+        main_content, 
+        sizing_mode='stretch_width', 
+        min_height=700
+    )

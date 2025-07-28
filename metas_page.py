@@ -499,6 +499,33 @@ def create_metas_crud_page(navigate_to_main_page):
             valor = str(duracao_exercicio_input.value)
 
         try:
+            check_query = ""
+            if tipo == "Água":
+                check_query = """
+                SELECT m.id_meta FROM meta m JOIN meta_agua ma ON m.id_meta = ma.id_meta
+                WHERE m.id_usuario = :user_id
+                """
+            elif tipo == "Sono":
+                check_query = """
+                SELECT m.id_meta FROM meta m JOIN meta_sono ms ON m.id_meta = ms.id_meta
+                WHERE m.id_usuario = :user_id
+                """
+            elif tipo == "Exercícios":
+                check_query = """
+                SELECT m.id_meta FROM meta m JOIN meta_exercicio me ON m.id_meta = me.id_meta
+                WHERE m.id_usuario = :user_id
+                """
+
+            if check_query:
+                existing_meta = db.fetch_dataframe(check_query, {"user_id": current_user["id"]})
+                if not existing_meta.empty:
+                    message_pane.object = f"""
+                    <div style='color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; text-align: center;'>
+                        ⚠️ Você já possui uma meta de {tipo}. Edite a meta existente ou exclua-a para adicionar uma nova.
+                    </div>
+                    """
+                    return
+
             query = """
             INSERT INTO meta (id_usuario, valor)
             VALUES (:user_id, :valor)

@@ -8,6 +8,7 @@ Antes de iniciar, certifique-se de que você tenha o Python 3 instalado.
 
 1.  **Configuração do Banco de Dados:**
     *   Execute o script localizado em `banco.sql` em seu sistema de gerenciamento de banco de dados para criar as tabelas necessárias.
+    *   Para popular as tabelas com dados de exemplo, execute o script `inserts.sql`.
 
 2.  **Variáveis de Ambiente:**
     *   Crie um arquivo chamado `.env` na raiz do projeto.

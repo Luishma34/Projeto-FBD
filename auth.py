@@ -10,13 +10,9 @@ def logout_user():
     current_user["id"] = None
     current_user["nome"] = None
 
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
 def authenticate_user(email, password):
     query = "SELECT id_usuario, nome FROM usuario WHERE email = :email AND senha = :senha"
-    hashed_password = hash_password(password)
-    result = db.execute_query(query, {"email": email, "senha": hashed_password})
+    result = db.execute_query(query, {"email": email, "senha": password})
 
     if result:
         user_data = result[0]

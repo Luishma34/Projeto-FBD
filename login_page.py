@@ -1,5 +1,5 @@
 import panel as pn
-from auth import authenticate_user, current_user, hash_password
+from auth import authenticate_user, current_user
 from database import db
 from datetime import date
 import re
@@ -105,9 +105,8 @@ def create_login_page(navigate_to_main_page):
             INSERT INTO usuario (nome, senha, email, data_nascimento, sexo)
             VALUES (:nome, :senha, :email, :data_nascimento, :sexo)
             """
-            hashed_password = hash_password(senha)
             params = {
-                'nome': nome, 'senha': hashed_password, 'email': email,
+                'nome': nome, 'senha': senha, 'email': email,
                 'data_nascimento': data_nasc, 'sexo': sexo
             }
             db.execute_query(query, params)

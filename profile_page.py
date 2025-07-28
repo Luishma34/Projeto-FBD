@@ -1,7 +1,7 @@
 import panel as pn
 from datetime import date
 from database import db
-from auth import current_user, logout_user, hash_password, update_local_name
+from auth import current_user, logout_user, update_local_name
 from utils import format_date_column, safe_get_value
 
 def create_profile_page(navigate_to_main_page, navigate_to_login):
@@ -104,9 +104,8 @@ def create_profile_page(navigate_to_main_page, navigate_to_login):
             db.execute_query(base_query, params)
 
             if senha_input.value:
-                hashed_password = hash_password(senha_input.value)
                 password_query = "UPDATE usuario SET senha = :senha WHERE id_usuario = :user_id"
-                db.execute_query(password_query, {"senha": hashed_password, "user_id": current_user["id"]})
+                db.execute_query(password_query, {"senha": senha_input.value, "user_id": current_user["id"]})
 
             message_pane.object = "<div class='success-message'>Perfil atualizado com sucesso!</div>"
             

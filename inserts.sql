@@ -102,15 +102,69 @@ INSERT INTO registro_alimentacao_descricao (id_registro_alimentacao, descricao) 
 (9, 'Feijoada'),
 (10, 'Salada e frango grelhado');
 
--- METAS
-INSERT INTO meta (valor, id_usuario) VALUES
-('Beber 2 litros de água por dia', 1),
-('Dormir 8 horas por noite', 2),
-('Correr 5 km por dia', 3),
-('Meditar 30 minutos por dia', 4),
-('Comer 5 porções de frutas por dia', 5),
-('Fazer exercícios 4 vezes por semana', 6),
-('Ler 1 livro por mês', 7),
-('Reduzir açúcar na dieta', 8),
-('Aumentar massa muscular', 9),
-('Melhorar qualidade do sono', 10);
+INSERT INTO meta (id_meta, valor, id_usuario) VALUES
+
+(1, 'Agua', 1),
+(2, 'Agua', 2),
+(3, 'Agua', 3),
+(4, 'Agua', 4),
+(5, 'Agua', 5),
+(6, 'Agua', 6),
+(7, 'Agua', 7),
+(8, 'Agua', 8),
+(9, 'Agua', 9),
+(10, 'Agua', 10),
+(11, 'Sono', 1),
+(12, 'Sono', 2),
+(13, 'Sono', 3),
+(14, 'Sono', 4),
+(15, 'Sono', 5),
+(16, 'Sono', 6),
+(17, 'Sono', 7),
+(18, 'Sono', 8),
+(19, 'Sono', 9),
+(20, 'Sono', 10),
+(21, 'Exercicio', 1),
+(22, 'Exercicio', 2),
+(23, 'Exercicio', 3),
+(24, 'Exercicio', 4),
+(25, 'Exercicio', 5),
+(26, 'Exercicio', 6),
+(27, 'Exercicio', 7),
+(28, 'Exercicio', 8),
+(29, 'Exercicio', 9),
+(30, 'Exercicio', 10);  
+INSERT INTO meta_agua (id_meta, id_usuario) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5),
+(6, 6),
+(7, 7),
+(8, 8),
+(9, 9),
+(10, 10);
+INSERT INTO meta_sono (id_meta, id_usuario) VALUES
+(11, 1),
+(12, 2),
+(13, 3),
+(14, 4),
+(15, 5),
+(16, 6),
+(17, 7),
+(18, 8),
+(19, 9),
+(20, 10);
+
+INSERT INTO meta_exercicio (id_meta, id_usuario) VALUES
+(21, 1),
+(22, 2),
+(23, 3),
+(24, 4),
+(25, 5),
+(26, 6),
+(27, 7),
+(28, 8),
+(29, 9),
+(30, 10);
